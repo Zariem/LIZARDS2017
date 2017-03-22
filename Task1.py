@@ -4,6 +4,7 @@ import numpy
 from sklearn import linear_model
 from sklearn.metrics import mean_squared_error, make_scorer
 from sklearn.model_selection import cross_val_score
+from sklearn.ensemble import AdaBoostRegressor
 from sklearn import svm
 
 filepath = "DataTask1/train.csv"
@@ -57,14 +58,15 @@ dataTest = read_data(filepathTest)
 our_scorer = make_scorer(error, greater_is_better = False)
 predictors = []
 
-for x in range(1,10):
+'''for x in range(1,10):
     print(x)
-    predictor = svm.SVR(kernel = 'poly', degree=x)
+    #predictor = svm.SVR(kernel = 'poly', degree=x)
+    predictor = AdaBoostRegressor(base_estimator = svm.SVR(kernel = 'poly', degree = x), loss = 'square')
     predictors.append( predictor)
     scores = cross_val_score(predictor, xsTrain, ys, cv = 10, scoring = our_scorer)
     print(numpy.mean(scores))
-
-predictor = svm.SVR(kernel = 'poly', degree=4)
+'''
+predictor = AdaBoostRegressor(base_estimator = svm.SVR(kernel = 'poly', degree=4), loss = 'square')
 
 model = predictor.fit(xsTrain, ys)
 values = model.predict(dataTest)
