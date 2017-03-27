@@ -1,12 +1,13 @@
 
 import numpy
 import math
+import sklearn
 
 from sklearn import linear_model
 from sklearn.metrics import mean_squared_error, make_scorer
 from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import AdaBoostRegressor
-from sklearn import svm
+from sklearn import svm, preprocessing
 
 filepath = "DataTask1/train.csv"
 filepathTest = "DataTask1/test.csv"
@@ -44,13 +45,12 @@ def extendFeatures(data):
             #new_line.append(math.sin(value)) #-62
             #new_line.append(1/value) #-65
             #new_line.append(math.exp(value)) #-59
-            #new_line.append(math.exp(value**2.0)) #-59
+            new_line.append(math.exp(value*(1/2.0))) #-25
+            new_line.append(math.exp(value*(1/3.0))) #-28
             #new_line.append(math.exp(-value)) #-59
             #new_line.append(math.sqrt(math.fabs(value))) #-49
             #new_line.append(math.asinh(value)) #-52
             #new_line.append(math.cosh(value)) #-46
-            #new_line.append(math.sqrt(math.exp(value))) #-29 !!!
-            #new_line.append(math.sqrt(math.exp(-value)))
         #new_line.append(math.fsum(line))
         bla.append(new_line)
     return bla
@@ -81,8 +81,7 @@ def exp_kernel(x, y):
 
 dataTrain = read_data()
 xsTrain = get_xsTrain(dataTrain)
-extendFeatures(xsTrain)
-ys = transformOut(get_ys(dataTrain))
+ys = get_ys(dataTrain)
 dataTest = read_data(filepathTest)
 
 xsTrainExtended = extendFeatures(xsTrain)
@@ -91,10 +90,10 @@ dataTestExtended = extendFeatures(dataTest)
 our_scorer = make_scorer(error, greater_is_better = False)
 predictors = []
 
-for x in range(10,20):
+for x in range(10,30):
     print(x)
-    predictor = svm.SVR(kernel = 'poly', degree=2)
-    predictor.kernel
+    predictor = svm.SVR(kernel = 'poly', degree=4)
+    #predictor.kernel
     #predictor = linear_model.LinearRegression()
     #predictor = AdaBoostRegressor(base_estimator = linear_model.LinearRegression(), loss = 'square')
     #predictor = AdaBoostRegressor(base_estimator = svm.SVR(kernel = 'poly', degree = x), loss = 'square')
@@ -102,15 +101,15 @@ for x in range(10,20):
     #scores = cross_val_score(predictor, xsTrain, ys, cv = 10, scoring = our_scorer)
     scores = cross_val_score(predictor, xsTrainExtended, ys, cv = x, scoring = our_scorer)
     print(numpy.mean(scores))
-
-#predictor = AdaBoostRegressor(base_estimator = svm.SVR(kernel = 'poly', degree=4), loss = 'square')
-
+'''
+predictor = AdaBoostRegressor(base_estimator = svm.SVR(kernel = 'poly', degree=4), loss = 'square')
 
 
 #model = predictor.fit(xsTrain, ys)
 #values = model.predict(dataTest)
 
-#model = predictor.fit(xsTrainExtended, ys)
-#values = model.predict(dataTestExtended)
+model = predictor.fit(xsTrainExtended, ys)
+values = model.predict(dataTestExtended)
 
-#write_to_csv(values, "task1_out")
+write_to_csv(values, "task1_out")
+'''
