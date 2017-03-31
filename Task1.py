@@ -96,12 +96,12 @@ our_scorer = make_scorer(error, greater_is_better = False)
 predictors = []
 '''
 for x in range(10,20):
-    for y in [0.03]:
+    for y in [280]:
         print("x: " + str(x) + ", y: " + str(y))
         #predictor = kernel_ridge.KernelRidge(alpha = y, kernel = 'poly', degree = x)
         #predictor = svm.SVR(kernel = 'poly', degree=4)
         #predictor.kernel
-        predictor = linear_model.Ridge(alpha = y, normalize = True)
+        predictor = linear_model.Ridge(alpha = y, normalize = False)
         #predictor = linear_model.LinearRegression()
         #predictor = AdaBoostRegressor(base_estimator = linear_model.LinearRegression(), loss = 'square')
         #predictor = AdaBoostRegressor(base_estimator = svm.SVR(kernel = 'poly', degree = x), loss = 'square')
@@ -113,7 +113,8 @@ for x in range(10,20):
 #predictor = AdaBoostRegressor(base_estimator = svm.SVR(kernel = 'poly', degree=4), loss = 'square')
 #predictor = kernel_ridge.KernelRidge(alpha=2.66, kernel='poly', degree = 4) #with extendFeatures: scores 18.820558609 in CrossValidation
 
-predictor = linear_model.Ridge(alpha=0.03,normalize=True) #with extendFeatures2, degree=3: scores 18.8093282323 in CV
+#predictor = linear_model.Ridge(alpha=0.03,normalize=True) #with extendFeatures2, degree=3: scores 18.8093282323 in CV
+predictor = linear_model.Ridge(alpha=280,normalize=False) #with extendFeatures2, degree=3, scores 17.4976055899 in CV
 
 #model = predictor.fit(xsTrain, ys)
 #values = model.predict(dataTest)
@@ -121,4 +122,5 @@ predictor = linear_model.Ridge(alpha=0.03,normalize=True) #with extendFeatures2,
 model = predictor.fit(xsTrainExtended, ys)
 values = model.predict(dataTestExtended)
 
-write_to_csv(values, "task1_ridge_polydeg3_normalized_out")
+write_to_csv(values, "task1_ridge_polydeg3_out")
+
