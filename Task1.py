@@ -56,6 +56,10 @@ def extendFeatures(data):
         bla.append(new_line)
     return bla
 
+def extendFeatures2(data):
+    poly = preprocessing.PolynomialFeatures(degree = 3)
+    return poly.fit_transform(data)
+
 def transformOut(data):
     bla = numpy.log(numpy.abs(data))
     return bla
@@ -85,28 +89,31 @@ xsTrain = get_xsTrain(dataTrain)
 ys = get_ys(dataTrain)
 dataTest = read_data(filepathTest)
 
-xsTrainExtended = extendFeatures(xsTrain)
-dataTestExtended = extendFeatures(dataTest)
+xsTrainExtended = extendFeatures2(xsTrain)
+dataTestExtended = extendFeatures2(dataTest)
 
 our_scorer = make_scorer(error, greater_is_better = False)
 predictors = []
 '''
-for x in range(3,5):
-    for y in [2.63,2.64,2.65,2.66,2.67,2.68,2.69,2.7]:
-        print("degree: " + str(x) + ", alpha: " + str(y))
-        predictor = kernel_ridge.KernelRidge(alpha = y, kernel = 'poly', degree = x)
+for x in range(10,20):
+    for y in [0.03]:
+        print("x: " + str(x) + ", y: " + str(y))
+        #predictor = kernel_ridge.KernelRidge(alpha = y, kernel = 'poly', degree = x)
         #predictor = svm.SVR(kernel = 'poly', degree=4)
         #predictor.kernel
+        predictor = linear_model.Ridge(alpha = y, normalize = True)
         #predictor = linear_model.LinearRegression()
         #predictor = AdaBoostRegressor(base_estimator = linear_model.LinearRegression(), loss = 'square')
         #predictor = AdaBoostRegressor(base_estimator = svm.SVR(kernel = 'poly', degree = x), loss = 'square')
         predictors.append(predictor)
         #scores = cross_val_score(predictor, xsTrain, ys, cv = 10, scoring = our_scorer)
-        scores = cross_val_score(predictor, xsTrainExtended, ys, cv = 10, scoring = our_scorer)
+        scores = cross_val_score(predictor, xsTrainExtended, ys, cv = x, scoring = our_scorer)
         print(numpy.mean(scores))
 '''
-predictor = AdaBoostRegressor(base_estimator = svm.SVR(kernel = 'poly', degree=4), loss = 'square')
-predictor = kernel_ridge.KernelRidge(alpha=2.66, kernel='poly', degree = 4) #scores 18.820558609 in CrossValidation
+#predictor = AdaBoostRegressor(base_estimator = svm.SVR(kernel = 'poly', degree=4), loss = 'square')
+#predictor = kernel_ridge.KernelRidge(alpha=2.66, kernel='poly', degree = 4) #with extendFeatures: scores 18.820558609 in CrossValidation
+
+predictor = linear_model.Ridge(alpha=0.03,normalize=True) #with extendFeatures2, degree=3: scores 18.8093282323 in CV
 
 #model = predictor.fit(xsTrain, ys)
 #values = model.predict(dataTest)
@@ -114,4 +121,4 @@ predictor = kernel_ridge.KernelRidge(alpha=2.66, kernel='poly', degree = 4) #sco
 model = predictor.fit(xsTrainExtended, ys)
 values = model.predict(dataTestExtended)
 
-write_to_csv(values, "task1_kernelized_ridge_out")
+write_to_csv(values, "task1_ridge_polydeg3_normalized_out")
