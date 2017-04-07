@@ -3,6 +3,8 @@ import numpy
 import math
 import sklearn
 
+from sklearn.metrics import accuracy_score
+
 filepath = "DataTask2/train.csv"
 filepathTest = "DataTask2/test.csv"
 
@@ -34,8 +36,8 @@ def write_to_csv(values, filename):
     with open(filename + ".csv", "w") as text_file:
         text_file.writelines(lines)
 
-def error(real_value, prediction):
-    return mean_squared_error(real_value, prediction)**0.5
+def accuracy(real_value, prediction):
+    return accuracy_score(real_value, prediction)
 
 
 dataTrain = read_data()
