@@ -8,7 +8,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.multiclass import OneVsRestClassifier, OneVsOneClassifier, OutputCodeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier, VotingClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 from sklearn.svm import LinearSVC
 from numpy import average
@@ -71,10 +71,17 @@ n_neighbors = 15
 #classifier = RandomForestClassifier(n_estimators=10) #score = 0.828964923628
 
 #classifier = AdaBoostClassifier() #score = 0.728927210309
-classifier = GradientBoostingClassifier() #score = 0.83893551918
+#classifier = GradientBoostingClassifier() #score = 0.83893551918
 
 #classifier = LinearDiscriminantAnalysis(solver='lsqr',shrinkage=None) #score=0.769988108861
 #classifier = QuadraticDiscriminantAnalysis(reg_param=0.33) #score = 0.844975272402
+
+#using a voting classifier
+clf1 = KNeighborsClassifier(n_neighbors, weights='distance') #score = 0.831930792577
+clf2 = GradientBoostingClassifier() #score = 0.83893551918
+clf3 = QuadraticDiscriminantAnalysis(reg_param=0.33) #score = 0.844975272402
+classifier = VotingClassifier(estimators=[('knn', clf1), ('gbc', clf2), ('qda', clf3)], voting='hard') #score = 0.85495104234
+
 
 scores = cross_val_score(classifier, xsTrain, ys, cv=5, scoring=scorer)
 
