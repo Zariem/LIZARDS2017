@@ -5,11 +5,12 @@ import sklearn
 
 from sklearn.metrics import accuracy_score, make_scorer
 from sklearn.model_selection import cross_val_score
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.multiclass import OneVsOneClassifier
-from sklearn.multiclass import OutputCodeClassifier
+from sklearn.multiclass import OneVsRestClassifier, OneVsOneClassifier, OutputCodeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 from sklearn.svm import LinearSVC
-from sklearn import neighbors
 from numpy import average
 
 
@@ -62,10 +63,21 @@ scorer = make_scorer(accuracy)
 
 
 n_neighbors = 15
-#classifier = neighbors.KNeighborsClassifier(n_neighbors, weights='uniform') #score = 0.822935369919
-classifier = neighbors.KNeighborsClassifier(n_neighbors, weights='distance') #score = 0.831930792577
+#classifier = KNeighborsClassifier(n_neighbors, weights='uniform') #score = 0.822935369919
+#classifier = KNeighborsClassifier(n_neighbors, weights='distance') #score = 0.831930792577
+
+
+#classifier = DecisionTreeClassifier() #score = 0.792934026568
+#classifier = RandomForestClassifier(n_estimators=10) #score = 0.828964923628
+
+#classifier = AdaBoostClassifier() #score = 0.728927210309
+classifier = GradientBoostingClassifier() #score = 0.83893551918
+
+#classifier = LinearDiscriminantAnalysis(solver='lsqr',shrinkage=None) #score=0.769988108861
+#classifier = QuadraticDiscriminantAnalysis(reg_param=0.33) #score = 0.844975272402
 
 scores = cross_val_score(classifier, xsTrain, ys, cv=5, scoring=scorer)
+
 print(average(scores)) #(higher is better)
 
 
