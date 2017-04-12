@@ -61,6 +61,14 @@ scorer = make_scorer(accuracy)
 #classifier = OneVsOneClassifier(LinearSVC(random_state=0)) #score = 0.70905711727
 #classifier = OutputCodeClassifier(LinearSVC(random_state=0), code_size=2, random_state=0) #score = 0.67703477785
 
+def reduceData(data, columns):
+    result = []
+    for line in data:
+        newline = []
+        for col in columns:
+            newline.append(line[col])
+        result.append(newline)
+    return result
 
 n_neighbors = 15
 #classifier = KNeighborsClassifier(n_neighbors, weights='uniform') #score = 0.822935369919
@@ -82,6 +90,11 @@ clf2 = GradientBoostingClassifier() #score = 0.83893551918
 clf3 = QuadraticDiscriminantAnalysis(reg_param=0.33) #score = 0.844975272402
 classifier = VotingClassifier(estimators=[('knn', clf1), ('gbc', clf2), ('qda', clf3)], voting='hard') #score = 0.85495104234
 
+columns = [1,3,8,13] # most important features
+#columns = [0,1,3,4,6,8,10,11,12,13,14] # without redundant features
+#columns = range(15)
+xsTrain = reduceData(xsTrain, columns)
+dataTest = reduceData(dataTest, columns)
 
 scores = cross_val_score(classifier, xsTrain, ys, cv=5, scoring=scorer)
 
