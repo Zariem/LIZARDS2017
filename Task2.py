@@ -10,6 +10,7 @@ from sklearn.multiclass import OneVsOneClassifier
 from sklearn.multiclass import OutputCodeClassifier
 from sklearn.svm import LinearSVC
 from sklearn import neighbors
+from numpy import average
 
 
 filepath = "DataTask2/train.csv"
@@ -55,16 +56,17 @@ dataTest = read_data(filepathTest)
 
 scorer = make_scorer(accuracy)
 
-#classifier = OneVsRestClassifier(LinearSVC(random_state=0)) #score = [0.60891089 0.565 0.69 0.63819095 0.66834171]
-#classifier = OneVsOneClassifier(LinearSVC(random_state=0)) #score = [0.72772277 0.625 0.68 0.77889447 0.73366834]
-#classifier = OutputCodeClassifier(LinearSVC(random_state=0), code_size=2, random_state=0) #score = [0.65346535 0.68 0.71 0.70854271 0.63316583]
+#classifier = OneVsRestClassifier(LinearSVC(random_state=0)) #score = 0.634088710881
+#classifier = OneVsOneClassifier(LinearSVC(random_state=0)) #score = 0.70905711727
+#classifier = OutputCodeClassifier(LinearSVC(random_state=0), code_size=2, random_state=0) #score = 0.67703477785
+
 
 n_neighbors = 15
-#classifier = neighbors.KNeighborsClassifier(n_neighbors, weights='uniform') #score = [0.85643564  0.8 0.81 0.84924623 0.79899497]
-classifier = neighbors.KNeighborsClassifier(n_neighbors, weights='distance') #score = [0.87128713 0.805 0.81 0.85929648 0.81407035]
+#classifier = neighbors.KNeighborsClassifier(n_neighbors, weights='uniform') #score = 0.822935369919
+classifier = neighbors.KNeighborsClassifier(n_neighbors, weights='distance') #score = 0.831930792577
 
 scores = cross_val_score(classifier, xsTrain, ys, cv=5, scoring=scorer)
-print(scores) #(higher is better)
+print(average(scores)) #(higher is better)
 
 
 classifier.fit(xsTrain, ys)
