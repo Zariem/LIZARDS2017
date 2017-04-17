@@ -84,14 +84,21 @@ n_neighbors = 15
 #classifier = LinearDiscriminantAnalysis(solver='lsqr',shrinkage=None) #score=0.769988108861
 #classifier = QuadraticDiscriminantAnalysis(reg_param=0.33) #score = 0.844975272402
 
+
 #using a voting classifier
 clf1 = KNeighborsClassifier(n_neighbors, weights='distance') #score = 0.831930792577
 clf2 = GradientBoostingClassifier() #score = 0.83893551918
+clf2_5 = GradientBoostingClassifier(learning_rate=0.55) #score = 0.84699049705
 clf3 = QuadraticDiscriminantAnalysis(reg_param=0.33) #score = 0.844975272402
-classifier = VotingClassifier(estimators=[('knn', clf1), ('gbc', clf2), ('qda', clf3)], voting='hard') #score = 0.85495104234
+clf3_5 = QuadraticDiscriminantAnalysis(reg_param=0.0) #score = 0.857060102493
+#classifier = VotingClassifier(estimators=[('knn', clf1), ('gbc', clf2), ('qda', clf3)], voting='hard') #score = 0.85495104234
+classifier = VotingClassifier(estimators=[('knn', clf1), ('gbc', clf2), ('gbc2', clf2_5), ('qda', clf3), ('qda2', clf3_5)], voting='hard') #score = 0.856980745311
 
-columns = [1,3,8,13] # most important features
-#columns = [0,1,3,4,6,8,10,11,12,13,14] # without redundant features
+#classifier = GradientBoostingClassifier(learning_rate=0.55) #score = 0.84699049705 -> but replacing clf2 scores only 0.845930941838 on voting classifier
+#classifier = QuadraticDiscriminantAnalysis(reg_param=0.0) #score = 0.857060102493 -> but replacing clf3 scores only 0.847995522165 on voting classifier...
+
+#columns = [1,3,8,13] # most important features
+columns = [0,1,3,4,6,8,10,11,12,13,14] # without redundant features
 #columns = range(15)
 xsTrain = reduceData(xsTrain, columns)
 dataTest = reduceData(dataTest, columns)
@@ -99,7 +106,14 @@ dataTest = reduceData(dataTest, columns)
 scores = cross_val_score(classifier, xsTrain, ys, cv=5, scoring=scorer)
 
 print(average(scores)) #(higher is better)
-
+'''
+for param in range(40,60,1):
+    parameter = param/100;
+    print(parameter)
+    classifier = GradientBoostingClassifier(learning_rate = parameter) #score = 0.83893551918
+    scores = cross_val_score(classifier, xsTrain, ys, cv=5, scoring=scorer)
+    print(average(scores)) #(higher is better)
+'''
 
 classifier.fit(xsTrain, ys)
 ysTest = classifier.predict(dataTest)
