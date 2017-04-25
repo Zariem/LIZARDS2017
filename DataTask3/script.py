@@ -9,7 +9,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier, VotingClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 from sklearn.svm import LinearSVC
-from sklearn.ensemble import BaggingClassifier, RandomForestClassifier
+from sklearn.feature_selection import SelectFromModel
+from sklearn.ensemble import BaggingClassifier, RandomForestClassifier, ExtraTreesClassifier
 from numpy import average
 
 
@@ -45,17 +46,53 @@ xs = train.loc[:, 'x1':'x100']
 # Prepare scorer
 scorer = make_scorer(accuracy)
 
-# Make Classifier
-classifier = RandomForestClassifier(n_estimators=15)
+# Feature Selection
+
+# Linear
+# classifier = LinearSVC(C=0.01, penalty="l1", dual=False).fit(xs, ys)
+# Score: 0.80
+
+##########################
+#
+# CLASSIFIERS
+#
+##########################
+
+# Extra Tree
+# classifier = ExtraTreesClassifier()
+# 0.90
+
+# Random Tree
+# classifier = RandomForestClassifier(n_estimators=15)
+# score = 0.91
+
+# 1 vs Rest with LinearSVC
+# classifier = OneVsRestClassifier(LinearSVC(random_state=0))
+# score = 0.41
+
+
+
+#################################
+#                               #
+# Fit Classifiers and Predict   #
+#                               #
+#################################
+
+
+# Fit Classifier
+classifier = classifier.fit(xs, ys)
+
+# Make new model
+model = SelectFromModel(classifier, prefit=True)
+xs_new = model.transform(xs)
 
 # Compute scores
-scores = cross_val_score(classifier, xs, ys, cv=10, scoring=scorer)
+scores = cross_val_score(classifier, xs_new, ys, cv=10, scoring=scorer)
 
 # Print average result
 print(average(scores))
 
-# Train Model
-classifier.fit(xs, ys)
+# Predict / Test classifier
 predictions = classifier.predict(test)
 
 # Write to CSV
