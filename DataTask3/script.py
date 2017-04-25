@@ -12,12 +12,14 @@ from sklearn.svm import LinearSVC
 from sklearn.ensemble import BaggingClassifier, RandomForestClassifier
 from numpy import average
 
-def write_to_csv(ids, predictions, filename):
+
+def write_to_csv(indices, predictions, filename):
     lines = ["Id,y\n"]
-    for index in range(len(ids)):
-        lines.append("%d,%d\n" % (ids[index], predictions[index]))
+    for index in range(len(indices)):
+        lines.append("%d,%d\n" % (indices[index], predictions[index]))
     with open(filename + ".csv", "w") as text_file:
         text_file.writelines(lines)
+
 
 def accuracy(real_value, prediction):
     return accuracy_score(real_value, prediction)
@@ -30,35 +32,31 @@ def add_averages(data):
     return result
 
 
-#Load Data
+# Load Data
 train = pd.read_hdf("train.h5", "train")
 test = pd.read_hdf("test.h5", "test")
 sample = pd.read_csv("sample.csv")
 
-#Extract ids, classes and features
+# Extract ids, classes and features
 ids = sample['Id'].values
-print(ids)
 ys = train.loc[:, 'y']
 xs = train.loc[:, 'x1':'x100']
 
-#Prepare scorer
+# Prepare scorer
 scorer = make_scorer(accuracy)
 
-#Make Classifier
+# Make Classifier
 classifier = RandomForestClassifier(n_estimators=15)
 
-#Compute scores
+# Compute scores
 scores = cross_val_score(classifier, xs, ys, cv=10, scoring=scorer)
 
-#Print average result
+# Print average result
 print(average(scores))
 
-#Train Model
+# Train Model
 classifier.fit(xs, ys)
 predictions = classifier.predict(test)
 
-# print(ysTest)
-
-write_to_csv(predictions, "out.csv")
-
-
+# Write to CSV
+write_to_csv(ids, predictions, "out")
