@@ -55,7 +55,7 @@ sess = tf.Session()
 feature_columns = [tf.contrib.layers.real_valued_column(k) for k in FEATURE_NAMES]
 
 classifier = tf.contrib.learn.DNNClassifier(feature_columns=feature_columns,
-                                            hidden_units=[500,50,200],
+                                            hidden_units=[800,200,500],
                                             n_classes=5)
 
 def input_fn(data_set):
@@ -76,9 +76,9 @@ def give_test(test_set):
     return test_arr
     #return test_set
 
-classifier.fit(input_fn=lambda: input_fn(input_set), steps=2500)
+classifier.fit(input_fn=lambda: input_fn(input_set), steps=3000)
 predictions = classifier.predict(input_fn=lambda: give_test(testing_set))
 #predictions = sess.run(classifier, feed_dict=testing_set)
 
 # Write to CSV
-write_to_csv(ids, list(predictions), "outNN-500-50-200")
+write_to_csv(ids, list(predictions), "outNN-800-200-500")
