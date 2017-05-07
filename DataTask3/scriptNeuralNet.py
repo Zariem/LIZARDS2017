@@ -14,6 +14,8 @@ from sklearn.ensemble import BaggingClassifier, RandomForestClassifier, ExtraTre
 from numpy import average
 
 import tensorflow as tf
+import os
+tf.logging.set_verbosity(tf.logging.ERROR) #to disable tensorflow warnings
 
 
 def write_to_csv(indices, predictions, filename):
@@ -44,9 +46,12 @@ global_cutoff = 40000
 input_set = pd.read_hdf("train.h5")
 training_set = input_set.loc[range(global_cutoff), :]
 evaluation_set = input_set.loc[range(global_cutoff, 45324), :]
+testing_set = pd.read_hdf("test.h5")
+samples = pd.read_csv("sample.csv")
+ids = samples.loc[:,"Id"].values
 
-testing_xs = pd.read_hdf("test.h5")
 
+sess = tf.Session()
 feature_columns = [tf.contrib.layers.real_valued_column(k) for k in FEATURE_NAMES]
 
 classifier = tf.contrib.learn.DNNClassifier(feature_columns=feature_columns,
@@ -57,12 +62,27 @@ def input_fn(data_set):
     feature_cols = {k: tf.constant(data_set[k].values) for k in FEATURE_NAMES}
     labels = tf.constant(np.int32(data_set[LABEL_NAME].values))
     return feature_cols, labels
+'''
+for i in range(1,31):
+    classifier.fit(input_fn=lambda: input_fn(training_set), steps=100)
 
-classifier.fit(input_fn=lambda: input_fn(training_set), steps=1000)
+    evaluated_accuracy_score = classifier.evaluate(input_fn=lambda: input_fn(evaluation_set), steps=1)["accuracy"]
+    print("\n-------\n")
+    print(i*100)
+    print("\nTest Accuracy: {0:f}".format(evaluated_accuracy_score))
+'''
+def give_test(test_set):
+    test_arr = np.asarray(test_set)
+    return test_arr
+    #return test_set
 
-evaluated_accuracy_score = classifier.evaluate(input_fn=lambda: input_fn(evaluation_set), steps=1)["accuracy"]
-
-print("\nTest Accuracy: {0:f}\n".format(evaluated_accuracy_score))
+classifier.fit(input_fn=lambda: input_fn(input_set), steps=1)
+predictions = classifier.predict(input_fn=lambda: give_test(testing_set))
+#predictions = sess.run(classifier, feed_dict=testing_set)
+print("\npredictions")
+print(predictions)
+print("\nlist(predictions)")
+print(list(predictions))
 
 # Write to CSV
-#write_to_csv(ids, predictions, "outNN")
+write_to_csv(ids, predictions, "outNN")
