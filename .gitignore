@@ -1,4 +1,5 @@
-.project
+*.xml
 .pydevproject
+.idea/
 ml_1/*
 *_out.csv

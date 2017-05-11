@@ -36,14 +36,16 @@ train = pd.read_hdf("train.h5", "train")
 test = pd.read_hdf("test.h5", "test")
 sample = pd.read_csv("sample.csv")
 
+
+indices = np.random.permutation(train.shape[0])
+training_idx, test_idx = indices[:80], indices[80:]
+training, validation = train.loc[training_idx, :], train.loc[test_idx, :]
+
+
 # Extract ids, classes and features
 ids = sample['Id'].values
 ys = train.loc[:, 'y']
 xs = train.loc[:, 'x1':'x100']
-
-# Specially for tensor data
-x_train, y_train, x_test, y_test = train_test_split(xs, ys, test_size=0.4, random_state=356)
-train, validation = train_test_split(train, test_size=0.4, random_state=356)
 
 
 def input_fn(data_set):
@@ -70,9 +72,9 @@ scorer = make_scorer(accuracy)
 classifier = tf.contrib.learn.DNNClassifier(feature_columns=feature_columns,
                                             hidden_units=[10, 5, 10],
                                             n_classes=5)
-
-classifier.fit(input_fn=lambda: input_fn(train))
-
+print("Before fit")
+classifier.fit(input_fn=lambda: input_fn(training))
+print("Done fit")
 accuracy_score = classifier.evaluate(input_fn=lambda: input_fn(validation), steps=1000)["accuracy"]
 
 print("\nTest Accuracy: {0:f}\n".format(accuracy_score))
@@ -128,8 +130,7 @@ print(scores.mean())
 
 
 def give_test(test_set=test):
-    test_arr = np.asarray(test_set)
-    return test_arr
+    return test_set
 
 
 # Predict / Test classifier
