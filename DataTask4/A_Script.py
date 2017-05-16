@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, make_scorer
-from sklearn.model_selection import KFold, train_test_split, cross_val_score
+from sklearn.semi_supervised import LabelSpreading, LabelPropagation
 import tensorflow as tf
 
 
@@ -32,6 +32,15 @@ feature_columns = [tf.contrib.layers.real_valued_column(k) for k in FEATURE_NAME
 # Load Data
 train_labeled = pd.read_hdf("data/train_labeled.h5", "train")
 train_unlabeled = pd.read_hdf("data/train_labeled.h5", "train")
+
+# Add unlabeled column
+train_unlabeled.assign(y=-1)  # for classifier, unlabeled data gets value -1
+
+# Merge the two sets
+train_set = [train_unlabeled, train_labeled]
+train_set = pd.concat(train_set)
+
+# Load training and sample set (for ids)
 test = pd.read_hdf("data/test.h5", "test")
 sample = pd.read_csv("data/sample.csv")
 
@@ -43,9 +52,8 @@ sample = pd.read_csv("data/sample.csv")
 
 # Extract ids, classes and features
 ids = sample['Id'].values
-ys_labeled = train_labeled.loc[:, 'y']
-xs_labeled = train_labeled.loc[:, 'x1':'x128']
-xs_unlabeled = train_unlabeled.loc[:, 'x1':'x128']
+ys = train_set.loc[:, 'y']
+xs = train_set.loc[:, 'x1':'x128']
 
 
 def input_fn(data_set):
@@ -69,13 +77,17 @@ scorer = make_scorer(accuracy_score)
 #
 ##########################
 
-classifier = tf.contrib.learn.DNNClassifier(feature_columns=feature_columns,
-                                            hidden_units=[10, 5, 10],
-                                            n_classes=10)
+# classifier = tf.contrib.learn.DNNClassifier(feature_columns=feature_columns,
+#                                             hidden_units=[10, 5, 10],
+#                                             n_classes=10)
+
+# classifier = LabelSpreading()
+classifier = LabelPropagation()
+
 print("Before fit")
-classifier.fit(input_fn=lambda: input_fn(train_labeled[:TRAIN_LOAD]))
+classifier.fit(xs[:7000], ys[:7000])
 print("Done fit")
-accuracy_score = classifier.evaluate(input_fn=lambda: input_fn(train_labeled[TRAIN_LOAD:]), steps=1)["accuracy"]
+accuracy_score = classifier.score(xs[7000:], ys[7000:])
 
 print("\nTest Accuracy: {0:f}\n".format(accuracy_score))
 print("")
@@ -134,7 +146,7 @@ def give_test(test_set=test):
 
 
 # Predict / Test classifier
-predictions = list(classifier.predict(input_fn=give_test))
+predictions = list(classifier.predict(test))
 
 # Write to CSV
 write_to_csv(ids, predictions, "out")
