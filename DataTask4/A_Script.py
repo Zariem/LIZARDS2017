@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, make_scorer
 from sklearn.semi_supervised import LabelSpreading, LabelPropagation
-import tensorflow as tf
+#import tensorflow as tf
 
 
 def write_to_csv(indices, predictions, filename):
@@ -27,7 +27,7 @@ COLUMN_NAMES = [LABEL_NAME] + FEATURE_NAMES  # 'y', 'x1', 'x2', ..., 'x100'
 TRAIN_LOAD = 7000  # out of 8000 samples
 
 
-feature_columns = [tf.contrib.layers.real_valued_column(k) for k in FEATURE_NAMES]
+#feature_columns = [tf.contrib.layers.real_valued_column(k) for k in FEATURE_NAMES]
 
 # Load Data
 train_labeled = pd.read_hdf("data/train_labeled.h5", "train")
