@@ -37,7 +37,7 @@ train_unlabeled = pd.read_hdf("data/train_labeled.h5", "train")
 train_unlabeled = train_unlabeled.assign(y=-1)  # for classifier, unlabeled data gets value -1
 
 # Merge the two sets
-train_set = [train_unlabeled, train_labeled]
+train_set = [train_labeled, train_unlabeled]
 train_set = pd.concat(train_set)
 
 # Load training and sample set (for ids)
@@ -83,11 +83,12 @@ scorer = make_scorer(accuracy_score)
 
 # classifier = LabelSpreading()
 classifier = LabelPropagation()
+print(ys[8990:9010])
 
 print("Before fit")
-classifier.fit(xs[:7000], ys[:7000])
+classifier.fit(xs[1000:], ys[1000:])
 print("Done fit")
-accuracy_score = classifier.score(xs[7000:], ys[7000:])
+accuracy_score = classifier.score(xs[:1000], ys[:1000])
 
 print("\nTest Accuracy: {0:f}\n".format(accuracy_score))
 print("")
