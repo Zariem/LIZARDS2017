@@ -34,7 +34,7 @@ train_labeled = pd.read_hdf("data/train_labeled.h5", "train")
 train_unlabeled = pd.read_hdf("data/train_labeled.h5", "train")
 
 # Add unlabeled column
-train_unlabeled.assign(y=-1)  # for classifier, unlabeled data gets value -1
+train_unlabeled = train_unlabeled.assign(y=-1)  # for classifier, unlabeled data gets value -1
 
 # Merge the two sets
 train_set = [train_unlabeled, train_labeled]
