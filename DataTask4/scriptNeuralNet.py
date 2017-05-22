@@ -13,10 +13,12 @@ from sklearn.feature_selection import SelectFromModel
 from sklearn.ensemble import BaggingClassifier, RandomForestClassifier, ExtraTreesClassifier
 from numpy import average
 
+import datetime
 import tensorflow as tf
 import os
 tf.logging.set_verbosity(tf.logging.ERROR) #to disable tensorflow warnings
 
+print(datetime.datetime.now())
 
 def write_to_csv(indices, predictions, filename):
     lines = ["Id,y\n"]
@@ -82,3 +84,4 @@ predictions = classifier.predict(input_fn=lambda: give_test(testing_set))
 
 # Write to CSV
 write_to_csv(ids, list(predictions), "outNN-500-50-200")
+print(datetime.datetime.now())
