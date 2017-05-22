@@ -39,17 +39,18 @@ def add_averages(data):
     return result
 
 
-FEATURE_NAMES = ['x' + str(k) for k in range(1,101)] # 'x1', 'x2', ..., 'x100'
+FEATURE_NAMES = ['x' + str(k) for k in range(1,129)] # 'x1', 'x2', ..., 'x100'
 LABEL_NAME = 'y'
 COLUMN_NAMES = [LABEL_NAME] + FEATURE_NAMES # 'y', 'x1', 'x2', ..., 'x100'
 
-global_cutoff = 40000
+global_cutoff = 9000
 
-input_set = pd.read_hdf("train.h5")
+input_set = pd.read_hdf("data/train_labeled.h5")
+input_set2 = pd.read_hdf("data/train_unlabeled.h5")
 training_set = input_set.loc[range(global_cutoff), :]
-evaluation_set = input_set.loc[range(global_cutoff, 45324), :]
-testing_set = pd.read_hdf("test.h5")
-samples = pd.read_csv("sample.csv")
+#evaluation_set = input_set.loc[range(global_cutoff, 9000), :]
+testing_set = pd.read_hdf("data/test.h5")
+samples = pd.read_csv("data/sample.csv")
 ids = samples.loc[:,"Id"].values
 
 
@@ -58,7 +59,7 @@ feature_columns = [tf.contrib.layers.real_valued_column(k) for k in FEATURE_NAME
 
 classifier = tf.contrib.learn.DNNClassifier(feature_columns=feature_columns,
                                             hidden_units=[500,50,200],
-                                            n_classes=5)
+                                            n_classes=10)
 
 def input_fn(data_set):
     feature_cols = {k: tf.constant(data_set[k].values) for k in FEATURE_NAMES}
@@ -77,8 +78,15 @@ def give_test(test_set):
     test_arr = {k: tf.constant(test_set[k].values, shape=[test_set[k].size,1]) for k in FEATURE_NAMES}
     return test_arr
     #return test_set
+print('start fit')
+classifier.fit(input_fn=lambda: input_fn(input_set), steps=12500)
 
-classifier.fit(input_fn=lambda: input_fn(input_set), steps=2500)
+print('end fit')
+
+#evaluated_accuracy_score = classifier.evaluate(input_fn=lambda: input_fn(evaluation_set), steps=1)["accuracy"]
+
+#print("\nTest Accuracy: {0:f}".format(evaluated_accuracy_score))
+    
 predictions = classifier.predict(input_fn=lambda: give_test(testing_set))
 #predictions = sess.run(classifier, feed_dict=testing_set)
 
