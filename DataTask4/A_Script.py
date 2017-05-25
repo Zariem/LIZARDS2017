@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import datetime
 from sklearn.metrics import accuracy_score, make_scorer
 from sklearn.semi_supervised import LabelSpreading, LabelPropagation
 #import tensorflow as tf
@@ -12,33 +13,41 @@ def write_to_csv(indices, predictions, filename):
     with open(filename + ".csv", "w") as text_file:
         text_file.writelines(lines)
 
-
+'''
 def add_averages(data):
     result = []
     for line in data:
         result.append(line.append(np.mean(line)))
     return result
-
+'''
 
 # Variables
-FEATURE_NAMES = ['x' + str(k) for k in range(1, 129)]  # 'x1', 'x2', ..., 'x100'
-LABEL_NAME = 'y'
-COLUMN_NAMES = [LABEL_NAME] + FEATURE_NAMES  # 'y', 'x1', 'x2', ..., 'x100'
-TRAIN_LOAD = 7000  # out of 8000 samples
+#FEATURE_NAMES = ['x' + str(k) for k in range(1, 129)]  # 'x1', 'x2', ..., 'x100'
+#LABEL_NAME = 'y'
+#COLUMN_NAMES = [LABEL_NAME] + FEATURE_NAMES  # 'y', 'x1', 'x2', ..., 'x100'
+#TRAIN_LOAD = 7000  # out of 8000 samples
 
 
 #feature_columns = [tf.contrib.layers.real_valued_column(k) for k in FEATURE_NAMES]
 
 # Load Data
 train_labeled = pd.read_hdf("data/train_labeled.h5", "train")
-train_unlabeled = pd.read_hdf("data/train_labeled.h5", "train")
+train_unlabeled = pd.read_hdf("data/train_unlabeled.h5", "train")
+
 
 # Add unlabeled column
 train_unlabeled = train_unlabeled.assign(y=-1)  # for classifier, unlabeled data gets value -1
 
 # Merge the two sets
-train_set = [train_labeled, train_unlabeled]
-train_set = pd.concat(train_set)
+''' !!! don't, this messes up the x-indices !!! '''
+#train_set = [train_labeled, train_unlabeled]
+#train_set = pd.concat(train_set)
+
+labled_xs = np.array(train_labeled.loc[:, 'x1':'x128'])
+unlabled_xs = np.array(train_unlabeled.loc[:, 'x1':'x128'])
+
+labled_ys = np.array(train_labeled.loc[:, 'y'])
+unlabled_ys = np.array(train_unlabeled.loc[:, 'y'])
 
 # Load training and sample set (for ids)
 test = pd.read_hdf("data/test.h5", "test")
@@ -52,9 +61,19 @@ sample = pd.read_csv("data/sample.csv")
 
 # Extract ids, classes and features
 ids = sample['Id'].values
-ys = train_set.loc[:, 'y']
-xs = train_set.loc[:, 'x1':'x128']
+#ys = np.array(train_set.loc[:, 'y'])
+#xs = np.array(train_set.loc[:, 'x1':'x128'])
 
+ys = np.concatenate((labled_ys, unlabled_ys))
+xs = np.concatenate((labled_xs, unlabled_xs))
+
+zs = np.array(test.loc[:, 'x1':'x128'])
+
+#print(np.shape(xs))
+#print(np.shape(ys))
+#print(np.shape(zs))
+
+#exit()
 
 def input_fn(data_set):
     feature_cols = {k: tf.constant(data_set[k].values, shape=[data_set[k].size, 1]) for k in FEATURE_NAMES}
@@ -81,13 +100,18 @@ scorer = make_scorer(accuracy_score)
 #                                             hidden_units=[10, 5, 10],
 #                                             n_classes=10)
 
-# classifier = LabelSpreading()
-classifier = LabelPropagation()
-print(ys[8990:9010])
+classifier = LabelSpreading()
+#classifier = LabelPropagation()
 
+
+print(datetime.datetime.now())
 print("Before fit")
+
 classifier.fit(xs[1000:], ys[1000:])
+
 print("Done fit")
+print(datetime.datetime.now())
+
 accuracy_score = classifier.score(xs[:1000], ys[:1000])
 
 print("\nTest Accuracy: {0:f}\n".format(accuracy_score))
@@ -147,7 +171,9 @@ def give_test(test_set=test):
 
 
 # Predict / Test classifier
-predictions = list(classifier.predict(test))
+predictions = list(classifier.predict(zs))
 
 # Write to CSV
 write_to_csv(ids, predictions, "out")
+
+print(datetime.datetime.now())
