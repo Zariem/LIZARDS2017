@@ -177,7 +177,7 @@ def cov_soft(unlabeled_dataframe, labeled_dataframe, gammas, means, clusterIndex
 	gamma = gammas[clusterIndex]
 	sum_of_gammas = np.sum(gamma)
 
-	dataInCluster = dataframe[dataframe[LABEL_NAME].isin([clusterIndex])]
+	dataInCluster = labeled_dataframe[labeled_dataframe[LABEL_NAME].isin([clusterIndex])]
 	labeled_data = dataInCluster.loc[:, FEATURE_NAMES].values
 	unlabeled_data = unlabeled_dataframe.values
 	n_labeled = len(labeled_data)
@@ -205,6 +205,7 @@ def initialiseGMM(labeled_dataframe, clusterIndexRange):
 def iterateGMM(unlabeled_dataframe, labeled_dataframe, pis, hard_pis, means, hard_means, covariances, clusterIndexRange, eta=0.1):
 	# E-Step:
 	gammas = gamma(unlabeled_dataframe, pis, means, covariances, eta)
+	n_labeled = len(labeled_dataframe)
 
 	new_pis = []
 	new_means = []
@@ -216,25 +217,56 @@ def iterateGMM(unlabeled_dataframe, labeled_dataframe, pis, hard_pis, means, har
 		new_covariances.append(cov_soft(unlabeled_dataframe, labeled_dataframe, gammas, means, clusterIndex))
 	return [new_pis, new_means, new_covariances]
 
+def predictGMM(eval_data, pis, means, covariances, eta=0.1):
+	prediction_probabilities = gamma(eval_data, pis, means, covariances, eta)
+	ys_pred = np.argmax(prediction_probabilities, axis=0) # gives the indices of the maximal elements for each data point, which are exactly their cluster indices
+	return ys_pred
 
-def semiSupervisedGMM(unlabeled_dataframe, labeled_dataframe, evaluation_dataframe, clusterIndexRange, eta=0.1):
+def semiSupervisedGMM(unlabeled_dataframe, labeled_dataframe, evaluation_dataframe, clusterIndexRange, max_iterations=1000, accuracy_cutoff=0.99, eta=0.1):
+	eval_data = evaluation_dataframe.loc[:, FEATURE_NAMES]
+	eval_ys = evaluation_dataframe.loc[:, LABEL_NAME]
+	print("eval_ys")
+	print(eval_ys)
+
 	[hard_pis, hard_means, covariances] = initialiseGMM(labeled_dataframe, clusterIndexRange)
 
 	pis = hard_pis
 	means = hard_means
 	# we can re-use covariances
+	iteration = 0
 	while True:
 		[pis, means, covariances] = iterateGMM(unlabeled_dataframe, labeled_dataframe, pis, hard_pis, means, hard_means, covariances, clusterIndexRange, eta)
 
 		# predict the data of evaluation_dataframe
-		# use sklearn.metrics.accuracy_score(y, y_predicted) to get a score
-		# until accuracy is high enough
-	return
+		ys_pred = predictGMM(eval_data, pis, means, covariances, eta)
+		print("ys_pred:")
+		print(ys_pred)
+		accuracy = accuracy_score(eval_ys, ys_pred)
+
+		print("iteration " + str(iteration) + ": accuracy = " + str(accuracy))
+		# until accuracy is high enough or max_iterations is reached
+		if (iteration > max_iterations):
+			break
+		if (accuracy > accuracy_cutoff):
+			break
+		iteration = iteration + 1
+
+	return [pis, means, covariances]
+
+# -------------------------------------------
+# ----------------- RUNNING -----------------
+# -------------------------------------------
+
+[train_full, eval_full] = getTrainAndEvalData(train_labeled,10,0)
+[pis, means, covariances] = semiSupervisedGMM(train_unlabeled, train_full, eval_full, range(10))
+ys_pred = predictGMM(test, pis, means, covariances)
+print(ys_pred)
 
 # -------------------------------------------
 # ----------------- TESTING -----------------
 # -------------------------------------------
 
+'''
 #print(train_labeled)
 #print(train_labeled.loc[range(1,10), :])
 #print(train_unlabeled.first_valid_index()) # how to find the first index. also use last_valid_index
@@ -243,7 +275,6 @@ df1 = train_labeled.loc[range(0,2500), :] # how to extract a range of observatio
 #print(df1.append(df2)) # how to append one data frame to another
 [train_data, eval_data] = getTrainAndEvalData(df1,10,2)
 #print(train_data)
-[train_full, eval_full] = getTrainAndEvalData(train_labeled,10,2)
 #observations = train_data.loc[:, FEATURE_NAMES]
 #print(observations) # our observations as pandas dataframe
 #print(len(observations))
@@ -254,6 +285,7 @@ df1 = train_labeled.loc[range(0,2500), :] # how to extract a range of observatio
 #print(labels) # our labels as pandas dataframe
 #print(labels.values) # our labels as raw data
 #print(len(labels.values)) # how many labels we have
+'''
 
 '''
 pi0 = pi_hard(train_full,0)
@@ -288,6 +320,7 @@ print(np.divide(m,[5,2,3])) # gives [[0.2 1. 1.] [1.6 1.5 2.3333333]]
 
 '''
 
+'''
 gamma = [0.1, 0.3, 0.05, 0.5] # probabilities of data points to be in cluster k
 data_unlabeled = [[1,1,1],[2,-2,2],[3,6,9],[4,5,6]]
 # find the weighted data point
@@ -316,7 +349,7 @@ print(cov_labeled)
 
 print("covariance is:")
 print(np.divide((cov_unlabeled + cov_labeled), (np.sum(gamma) + len(data_labeled) - 1)))
-
+'''
 
 '''
 eval_data = eval_full.loc[:, FEATURE_NAMES]
@@ -351,4 +384,10 @@ for clusterIndex in range(10):
 	print(soft_pi)
 	soft_pis.append(soft_pi)
 print(np.sum(soft_pis)) # should sum up to 1
+'''
+'''
+x =[[1, 5, 12, 41], [0, 12, -4, 8], [8, 23, 65, 1]]
+print(np.argmax(x)) # gives 10, which is the index of element 65
+print(np.argmax(x, axis=0)) # gives [2 2 2 0], the indices of 8, 23, 65, and 41
+print(np.argmax(x, axis=1)) # gives [3 1 2], the indices of 41, 12 and 65
 '''
