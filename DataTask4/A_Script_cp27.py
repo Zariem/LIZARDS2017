@@ -1,8 +1,12 @@
 import numpy as np
 import pandas as pd
+import sklearn
 import datetime
 from sklearn.metrics import accuracy_score, make_scorer
 from sklearn.semi_supervised import LabelSpreading, LabelPropagation
+from sklearn.linear_model import SGDClassifier
+from frameworks.CPLELearning import CPLELearningModel
+from frameworks.SelfLearning import SelfLearningModel
 #import tensorflow as tf
 
 
@@ -39,7 +43,7 @@ train_unlabeled = pd.read_hdf("data/train_unlabeled.h5", "train")
 train_unlabeled = train_unlabeled.assign(y=-1)  # for classifier, unlabeled data gets value -1
 
 # Merge the two sets
-''' !!! don't, this messes up the x-indices !!! '''
+## don't, this messes up the indices
 #train_set = [train_labeled, train_unlabeled]
 #train_set = pd.concat(train_set)
 
@@ -100,8 +104,9 @@ scorer = make_scorer(accuracy_score)
 #                                             hidden_units=[10, 5, 10],
 #                                             n_classes=10)
 
-classifier = LabelSpreading()
-#classifier = LabelPropagation()
+#classifier = CPLELearningModel(sklearn.svm.SVC(kernel="rbf", probability=True), predict_from_probabilities=True)
+#classifier = SelfLearningModel(SGDClassifier(loss='log', penalty='l1'))
+classifier = SelfLearningModel(sklearn.svm.SVC(kernel="rbf", probability=True))
 
 
 print(datetime.datetime.now())
@@ -174,6 +179,6 @@ def give_test(test_set=test):
 predictions = list(classifier.predict(zs))
 
 # Write to CSV
-write_to_csv(ids, predictions, "out")
+write_to_csv(ids, predictions, "out_cp27")
 
 print(datetime.datetime.now())

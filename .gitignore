@@ -3,3 +3,6 @@
 .idea/
 ml_1/*
 *_out.csv
+*.project
+DataTask4/out.csv
+DataTask4/out_cp27.csv
