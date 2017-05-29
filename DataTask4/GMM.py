@@ -98,7 +98,7 @@ def cov_hard(dataframe, clusterIndex):
 	rawDataInCluster = np.matrix(dataInCluster.loc[:, FEATURE_NAMES].values) # now we can leave the ys away and take the raw data
 	n = len(rawDataInCluster) # how many data points we have in that cluster
 	log(str(n) + " elements in cluster " + str(clusterIndex))
-	meanMatrix = ((1/n) * (np.matmul(np.matrix(np.ones((n,n))), rawDataInCluster)))
+	meanMatrix = np.mean(rawDataInCluster, axis=0) # we can rely on broadcasting
 	stdDeviation = rawDataInCluster - meanMatrix
 	nonNormalisedCov = np.matmul(np.transpose(stdDeviation), stdDeviation)
 	covarianceMatrix = 1.0/(n-1) * nonNormalisedCov
