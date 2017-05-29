@@ -232,6 +232,17 @@ def semiSupervisedGMM(unlabeled_dataframe, labeled_dataframe, evaluation_datafra
 
 	pis = hard_pis
 	means = hard_means
+	
+	
+	# predict the data of evaluation_dataframe
+	ys_pred = predictGMM(eval_data, pis, means, covariances, eta)
+	print("ys_pred:")
+	print(ys_pred)
+	accuracy = accuracy_score(eval_ys, ys_pred)
+
+	print("iteration " + str(-1) + ": accuracy = " + str(accuracy))
+
+
 	# we can re-use covariances
 	iteration = 0
 	while True:
