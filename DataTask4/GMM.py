@@ -11,11 +11,11 @@ COLUMN_NAMES = [LABEL_NAME] + FEATURE_NAMES # 'y', 'x1', 'x2', ..., 'x100'
 TEST_FEATURE_NAMES = ['x' + str(k) for k in range(1,10)] # 'x1', 'x2', ..., 'x9'
 
 def write_to_csv(indices, predictions, filename):
-    lines = ["Id,y\n"]
-    for index in range(len(indices)):
-        lines.append("%d,%d\n" % (indices[index], predictions[index]))
-    with open(filename + ".csv", "w") as text_file:
-        text_file.writelines(lines)
+	lines = ["Id,y\n"]
+	for index in range(len(indices)):
+		lines.append("%d,%d\n" % (indices[index], predictions[index]))
+	with open(filename + ".csv", "w") as text_file:
+		text_file.writelines(lines)
 
 def log(text):
 	if ENABLE_LOG:
