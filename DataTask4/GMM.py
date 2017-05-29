@@ -47,7 +47,7 @@ def split(data, amountOfSets=10):
 		# so we get a slightly larger last set (instead of a smaller one)
 		if (set_index == (amountOfSets - 1)):
 			set_end = last + 1
-		df = data.loc[range(set_start,set_end), :]
+		df = data.loc[range(int(set_start),int(set_end)), :]
 		dataframes.append(df)
 	return dataframes
 
@@ -75,7 +75,7 @@ def getTrainAndEvalData(data, amountOfSets=10, evalSetIndex=0):
 
 # returns the amount of elements that are in a given cluster
 def amountOfDataInCluster(dataframe, clusterIndex):
-	return (len(dataframe[dataframe[LABEL_NAME].isin([clusterIndex])]))
+	return float(len(dataframe[dataframe[LABEL_NAME].isin([clusterIndex])]))
 
 # returns the percentage of elements that are in a given cluster of that data set
 # this method is for hard assignments (will be used for initialisation of the pi-values)
@@ -101,7 +101,7 @@ def cov_hard(dataframe, clusterIndex):
 	meanMatrix = ((1/n) * (np.matmul(np.matrix(np.ones((n,n))), rawDataInCluster)))
 	stdDeviation = rawDataInCluster - meanMatrix
 	nonNormalisedCov = np.matmul(np.transpose(stdDeviation), stdDeviation)
-	covarianceMatrix = 1/(n-1) * nonNormalisedCov
+	covarianceMatrix = 1.0/(n-1) * nonNormalisedCov
 	return covarianceMatrix
 
 # gives the probability of a data point being in the area around the given mean with given covariance
@@ -117,7 +117,7 @@ def getProbability(data_point, mean, det_of_covariance, inv_of_covariance):
 	log(deviation)
 	power = -0.5 * (np.matmul(deviation, np.matmul(inv_of_covariance, np.transpose(deviation))))
 	power = power.item((0,0)) # because before that, power was still a numpy matrix
-	return 1/factor * math.exp(power)
+	return 1.0/factor * math.exp(power)
 
 # returns the probabilities of the data points in the unlabeled dataframe to be in a given cluster - not normalised
 # i.e. returns an array for which the i'th entry corresponds to the probability of observation i being in that cluster
